@@ -3,8 +3,9 @@ env_path
 
 
 # ignore data files
-*.h5
-
+**/*.h5
+**/*.tif
+**/*.png
 
 # ignore zip files
 *.zip
