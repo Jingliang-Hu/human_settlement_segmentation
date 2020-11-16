@@ -1,22 +1,16 @@
 # ignore local environment setting
 env_path
-
-
 # ignore data files
 *.h5
-
-
 # ignore zip files
 *.zip
-
 # ignore python compile
 *.pyc
 *__pycache__
 *.py.swp
-
-
 # ignore backups
 backups
-
+# ignore output files
+**/*outcome*
 
 
