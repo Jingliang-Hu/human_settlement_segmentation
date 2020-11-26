@@ -1,6 +1,6 @@
 import os
 import sys
-sys.path.append(os.path.abspath("../src"))
+sys.path.append(os.path.abspath("../src/uil"))
 import h5py
 import numpy as np
 import geo_uil as uil
@@ -12,13 +12,19 @@ from tqdm import tqdm
 '''
 load 10 meter GSD label
 '''
+# Nairobi
 label_dir = '00097_21711_nairobi_10m.tif'
+data_dir = '/datastore/DATA/classification/SEN2/global_utm/00097_21711_Nairobi/autumn/21711_autumn.tif'
+
+# New York
+label_dir ='00010_23083_newyork_10m.tif' 
+data_dir  ='/datastore/DATA/classification/SEN2/global_utm/00010_23083_NewYork/autumn/23083_autumn.tif'
+
 f = gdal.Open(label_dir)
 dat = f.ReadAsArray()
 lab_geoInfoGrid = f.GetGeoTransform()
 del f
 
-data_dir = '/datastore/DATA/classification/SEN2/global_utm/00097_21711_Nairobi/autumn/21711_autumn.tif'
 
 
 '''
@@ -34,14 +40,14 @@ lab = np.argmax(dat,axis=0)+1
 lab[lab[:]==4]=0
 # set the non-building pixels as the class others
 sum_tmp = np.sum(dat,axis=0)
-lab[sum_tmp[:]==0]=4
+lab[sum_tmp[:]==0]=0
 
 
 '''
 patch location indication
 '''
 
-patch_label_perc = 0.7
+patch_label_perc = 1 
 patch_size = 32
 patch_label_nb_thres = np.round(patch_size * patch_size * patch_label_perc).astype(np.int32)
 half_patch = np.array(patch_size/2).astype(np.int8)
@@ -110,8 +116,8 @@ city = data_dir.split('/')[-3]
 file_name = city+'_Patch_'+str(patch_size)+'_LabPerc_'+str(int(patch_label_perc*100))+'.h5'
 
 f = h5py.File(file_name,'w')
-f.create_dataset("dat_patch", data=dat_patch)
-f.create_dataset("lab_patch", data=lab_patch)
+f.create_dataset("dat", data=dat_patch)
+f.create_dataset("lab", data=lab_patch)
 f.close()
 
 
