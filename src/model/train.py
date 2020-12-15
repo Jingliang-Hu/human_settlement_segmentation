@@ -26,7 +26,7 @@ def train_rg(model, device, train, valid, n_epoch, criterion, optimizer, schedul
         for batch in tqdm(train):
             # data and label for forward proporgation
             data = batch['data'].type(torch.float32).to(device)
-            label = batch['label'].type(torch.long).to(device)
+            label = batch['label'].type(torch.float32).to(device)
             pred = model(data).type(torch.float32)
             # back proporgation
             optimizer.zero_grad()
@@ -214,7 +214,7 @@ def test_rg(model, device, test_dat, criterion):
         for i_batch, batch in enumerate(pred_loader):
             # data and label for forward proporgation
             data = batch['data'].type(torch.float32).to(device)
-            label = batch['label'].type(torch.long).to(device)
+            label = batch['label'].type(torch.float32).to(device)
             pred = model(data).type(torch.float32)
             # reshape label and prediction to exclude no label pixels
             loss = criterion(pred, label-1)
