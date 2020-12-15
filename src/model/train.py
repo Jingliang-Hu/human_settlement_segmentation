@@ -11,6 +11,57 @@ def save_best_model_func(model, save_best_model, model_dir, epoch, val_loss):
 
     return 0
 
+def train_rg(model, device, train, valid, n_epoch, criterion, optimizer, scheduler, save_best_model=1, model_dir='./model', patient=10):
+    print('training started ...')
+    tra_loss = np.zeros(n_epoch)
+    val_loss = np.zeros(n_epoch)
+    lr_rate = np.zeros(n_epoch)
+    model_epoch = 0
+    
+    for epoch in range(n_epoch):
+        running_loss = 0.0
+        correct = 0.0
+        total_pred = 0.0
+        lr_rate[epoch] = optimizer.param_groups[0]['lr']
+        for batch in tqdm(train):
+            # data and label for forward proporgation
+            data = batch['data'].type(torch.float32).to(device)
+            label = batch['label'].type(torch.long).to(device)
+            pred = model(data).type(torch.float32)
+            # back proporgation
+            optimizer.zero_grad()
+            loss = criterion(pred, label)
+            loss.backward()
+            optimizer.step()
+            # statistics
+            running_loss += loss.item() * label.shape[0]
+        tra_loss[epoch] = running_loss / len(train) 
+        val_loss[epoch], val_acc[epoch] = test_rg(model, device, valid.dataset.dataset, criterion)
+               
+        # update learning rate
+        scheduler.step(val_loss[epoch])
+        print('epoch %d: training loss: %.6f; training acc: %.6f; validation loss: %.6f; validation acc: %.6f; learning rate: %.6f' % (epoch+1, tra_loss[epoch], tra_acc[epoch], val_loss[epoch], val_acc[epoch], lr_rate[epoch]))
+
+        # save the model that has the lowest validation loss
+        model_save_flag = save_best_model_func(model, save_best_model, model_dir, epoch, val_loss)
+        model_epoch = epoch if model_save_flag else model_epoch
+        
+        # training early stop
+        if patient>=n_epoch:
+            continue
+        elif epoch <= patient:
+            continue
+        elif (val_loss[epoch-patient]<val_loss[epoch-patient+1:epoch+1]).all():
+            print('Early stopping patient (%d) reached' % (patient))
+            break
+        
+    return tra_loss, tra_acc, val_loss, val_acc, model_epoch
+
+
+
+
+
+
 def train_alpha(model, device, train, valid, n_epoch, criterion, optimizer, scheduler, save_best_model=1, model_dir='./model', patient=10):
     print('training started ...')
     tra_loss = np.zeros(n_epoch)
@@ -21,9 +72,9 @@ def train_alpha(model, device, train, valid, n_epoch, criterion, optimizer, sche
     lr_rate = np.zeros(n_epoch)
 
     model_epoch = 0
+    model.train()
 
     for epoch in range(n_epoch):
-        model.train()
         running_loss = 0.0
         correct = 0.0
         total_pred = 0.0
@@ -82,9 +133,9 @@ def train(model, device, train, valid, n_epoch, criterion, optimizer, scheduler,
     lr_rate = np.zeros(n_epoch)
 
     model_epoch = 0 
+    model.train()
 
     for epoch in range(n_epoch):
-        model.train()
         running_loss = 0.0
         correct = 0.0
         total_pred = 0.0
@@ -154,13 +205,34 @@ def prediction(model, device, test_dat):
     return out_prediction
             
 
+def test_rg(model, device, test_dat, criterion):
+    model.eval()
+    pred_loader = DataLoader(test_dat, batch_size=1)
+
+    running_loss = 0.0
+    with torch.no_grad():
+        for i_batch, batch in enumerate(pred_loader):
+            # data and label for forward proporgation
+            data = batch['data'].type(torch.float32).to(device)
+            label = batch['label'].type(torch.long).to(device)
+            pred = model(data).type(torch.float32)
+            # reshape label and prediction to exclude no label pixels
+            loss = criterion(pred, label-1)
+            # statistics
+            running_loss += loss.item() * label.shape[0]
+            
+        testLoss = running_loss/len(pred_loader)
+    return testLoss
+
+
+
+
 
 def test(model, device, test_dat, criterion):
 
     model.eval()
 
     pred_loader = DataLoader(test_dat, batch_size=1)
-    nb_img_patches = len(pred_loader.dataset)
 
     running_loss = 0.0
     correct = 0.0
@@ -201,7 +273,6 @@ def test_alpha(model, device, test_dat, criterion):
     model.eval()
 
     pred_loader = DataLoader(test_dat, batch_size=1)
-    nb_img_patches = len(pred_loader.dataset)
 
     running_loss = 0.0
     correct = 0.0
