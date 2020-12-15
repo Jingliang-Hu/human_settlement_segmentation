@@ -84,42 +84,14 @@ STEP FOUR: Train the network
 # import modelOperation
 import train
 print('Start training ...')
-traLoss, traArry, valLoss, valArry, model_epoch = train.train_rg(model, cudaNow, train_loader, valid_loader, paraDict["n_epoch"], criterion, optimizer, scheduler, save_best_model=paraDict["save_best_model"], model_dir=model_dir, patient=paraDict["training_patient"])
+traLoss, valLoss,  model_epoch, lr_rate = train.train_rg(model, cudaNow, train_loader, valid_loader, paraDict["n_epoch"], criterion, optimizer, scheduler, save_best_model=paraDict["save_best_model"], model_dir=model_dir, patient=paraDict["training_patient"])
 
 '''
 STEP FIVE: Prediction and calculate the metrics
 '''
 print('Start prediction ...')
 predict_model.load_state_dict(torch.load(model_dir, map_location=cudaNow))
-test_loss, test_accuracy = train.test_alpha(predict_model, cudaNow, pred_dat, criterion)
-
-predictions = train.prediction(predict_model, cudaNow, pred_dat)
-predictions = predictions.numpy()
-label_tmp = pred_dat.label.copy()
-
-y_true = label_tmp[label_tmp>0]
-y_pred = predictions[label_tmp>0]
-
-print('Calculating metrics ...')
-# average accuracy
-from sklearn.metrics import balanced_accuracy_score
-aa = balanced_accuracy_score(y_true, y_pred)
-# overall accuracy
-from sklearn.metrics import accuracy_score
-oa = accuracy_score(y_true, y_pred)
-# kappa coefficient
-from sklearn.metrics import cohen_kappa_score
-ka = cohen_kappa_score(y_true, y_pred)
-# iou
-# from sklearn.metrics import jaccard_score
-# iou = jaccard_score(y_true[0], y_pred[0])
-# producer accuracy
-from sklearn.metrics import confusion_matrix
-cm = confusion_matrix(y_true, y_pred)
-cm_tmp = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-pa = cm_tmp.diagonal()
-
-
+test_loss = train.test_rg(predict_model, cudaNow, pred_dat, criterion)
 
 '''
 STEP SIX: Save the model and accuracy
@@ -127,18 +99,13 @@ STEP SIX: Save the model and accuracy
 print('Saving evaluation metrics ...')
 fid = h5py.File(os.path.join(outcomeDir,'training_history.h5'),'w')
 fid.create_dataset('traLoss',data=traLoss)
-fid.create_dataset('traArry',data=traArry)
 fid.create_dataset('valLoss',data=valLoss)
-fid.create_dataset('valArry',data=valArry)
+fid.create_dataset('lr_rate',data=lr_rate)
 fid.create_dataset('model_epoch',data=model_epoch)
 fid.close()
 
 fid = h5py.File(os.path.join(outcomeDir,'test_accuracy.h5'),'w')
-fid.create_dataset('cm',data=cm)
-fid.create_dataset('oa',data=oa)
-fid.create_dataset('aa',data=aa)
-fid.create_dataset('ka',data=ka)
-fid.create_dataset('pa',data=pa)
+fid.create_dataset('test_loss',data=test_loss)
 fid.create_dataset('model_epoch',data=model_epoch)
 fid.close()
 

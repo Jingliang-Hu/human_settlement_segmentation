@@ -19,9 +19,9 @@ from osgeo import gdal
 #
 # Parameter setting
 #
-model_directory = '/data/hu/project/human_settlement_segmentation/experiments/test/unet_test_debug_run_outcome_2020-12-14_15-13-35/model'
-data_directory  = '/data/hu/project/human_settlement_segmentation/data/23083_autumn.tif'
-out_map_directory = '/data/hu/project/human_settlement_segmentation/data/new_york_test_map.tif'
+model_directory = '../experiments/test/unet_regression_test_debug_run_outcome_2020-12-15_08-54-10/model'
+data_directory  = '../data/23083_autumn.tif'
+out_map_directory = '../data/new_york_test_map.tif'
 patch_size = 256
 model_type = model_directory.split('/')[-2].split('_')[0]
 cudaNow = torch.device("cuda:0")
@@ -31,7 +31,7 @@ cudaNow = torch.device("cuda:0")
 step 1: initial segmentation map
 '''
 print('initial geotiff file for segmentation map')
-geo.intial_geotiff_segmentation_map(data_directory, out_map_directory)
+geo.intial_geotiff_segmentation_prob_map(data_directory, out_map_directory)
 
 
 '''
@@ -61,7 +61,7 @@ print(np.unique(predictions))
 step 4: save inferencing
 '''
 
-geo.save_prediction_inference(out_map_directory, predictions, img_coord)
+geo.save_regression_inference(out_map_directory, predictions, img_coord)
 
 
 

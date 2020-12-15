@@ -2,6 +2,8 @@ import torch
 import numpy as np
 from tqdm import tqdm
 from torch.utils.data import DataLoader
+import torch.nn as nn
+
 
 def save_best_model_func(model, save_best_model, model_dir, epoch, val_loss):
     if val_loss[epoch] == val_loss[:epoch+1].min() and save_best_model:
@@ -17,7 +19,7 @@ def train_rg(model, device, train, valid, n_epoch, criterion, optimizer, schedul
     val_loss = np.zeros(n_epoch)
     lr_rate = np.zeros(n_epoch)
     model_epoch = 0
-    
+    softmax = nn.Softmax(dim=1)
     for epoch in range(n_epoch):
         running_loss = 0.0
         correct = 0.0
@@ -28,6 +30,7 @@ def train_rg(model, device, train, valid, n_epoch, criterion, optimizer, schedul
             data = batch['data'].type(torch.float32).to(device)
             label = batch['label'].type(torch.float32).to(device)
             pred = model(data).type(torch.float32)
+            pred = softmax(pred)
             # back proporgation
             optimizer.zero_grad()
             loss = criterion(pred, label)
@@ -36,11 +39,11 @@ def train_rg(model, device, train, valid, n_epoch, criterion, optimizer, schedul
             # statistics
             running_loss += loss.item() * label.shape[0]
         tra_loss[epoch] = running_loss / len(train) 
-        val_loss[epoch], val_acc[epoch] = test_rg(model, device, valid.dataset.dataset, criterion)
+        val_loss[epoch] = test_rg(model, device, valid.dataset.dataset, criterion)
                
         # update learning rate
         scheduler.step(val_loss[epoch])
-        print('epoch %d: training loss: %.6f; training acc: %.6f; validation loss: %.6f; validation acc: %.6f; learning rate: %.6f' % (epoch+1, tra_loss[epoch], tra_acc[epoch], val_loss[epoch], val_acc[epoch], lr_rate[epoch]))
+        print('epoch %d: training loss: %.6f; validation loss: %.6f; learning rate: %.6f' % (epoch+1, tra_loss[epoch], val_loss[epoch], lr_rate[epoch]))
 
         # save the model that has the lowest validation loss
         model_save_flag = save_best_model_func(model, save_best_model, model_dir, epoch, val_loss)
@@ -55,7 +58,7 @@ def train_rg(model, device, train, valid, n_epoch, criterion, optimizer, schedul
             print('Early stopping patient (%d) reached' % (patient))
             break
         
-    return tra_loss, tra_acc, val_loss, val_acc, model_epoch
+    return tra_loss, val_loss, model_epoch, lr_rate
 
 
 
@@ -116,7 +119,7 @@ def train_alpha(model, device, train, valid, n_epoch, criterion, optimizer, sche
             print('Early stopping patient (%d) reached' % (patient))
             break
 
-    return tra_loss, tra_acc, val_loss, val_acc, model_epoch
+    return tra_loss, tra_acc, val_loss, val_acc, model_epoch, lr_rate
 
 
 
@@ -187,14 +190,13 @@ def train(model, device, train, valid, n_epoch, criterion, optimizer, scheduler,
             print('Early stopping patient (%d) reached' % (patient))
             break
 
-    return tra_loss, tra_acc, val_loss, val_acc, model_epoch
+    return tra_loss, tra_acc, val_loss, val_acc, model_epoch, lr_rate
 
 
 def prediction(model, device, test_dat):
     model.eval()
     pred_loader = DataLoader(test_dat, batch_size=16)
     out_prediction = torch.zeros((test_dat.data.shape[0], test_dat.data.shape[2], test_dat.data.shape[3]))
-
     with torch.no_grad():
         for i_batch, batch in tqdm(enumerate(pred_loader)):
             data = batch['data'].type(torch.float32).to(device)
@@ -209,11 +211,13 @@ def prediction_rg(model, device, test_dat):
     pred_loader = DataLoader(test_dat, batch_size=16)
     out_prediction = torch.zeros((test_dat.data.shape[0],3,test_dat.data.shape[2], test_dat.data.shape[3]))
     
+    softmax = nn.Softmax(dim=1)
     with torch.no_grad():
         for i_batch, batch in tqdm(enumerate(pred_loader)):
             data = batch['data'].type(torch.float32).to(device)
             pred = model(data).type(torch.float32)
-            out_prediction[i_batch:i_batch+data.shape[0],:,:,:] = predicted
+            pred = softmax(pred)
+            out_prediction[i_batch:i_batch+data.shape[0],:,:,:] = pred
     return out_prediction
 
 

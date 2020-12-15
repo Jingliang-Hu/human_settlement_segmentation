@@ -19,12 +19,12 @@ from osgeo import gdal
 #
 # Parameter setting
 #
-model_directory = '/data/hu/project/human_settlement_segmentation/experiments/test/unet_test_debug_run_outcome_2020-12-14_15-13-35/model'
-data_directory  = '/data/hu/project/human_settlement_segmentation/data/23083_autumn.tif'
-out_map_directory = '/data/hu/project/human_settlement_segmentation/data/new_york_test_map.tif'
-patch_size = 4
+model_directory = '../experiments/test/unet_test_debug_run_outcome_2020-12-14_16-08-00/model'
+data_directory  = '../data/23083_autumn.tif'
+out_map_directory = '../data/new_york_test_map.tif'
+patch_size = 256
 model_type = model_directory.split('/')[-2].split('_')[0]
-cudaNow = torch.device("cuda:5")
+cudaNow = torch.device("cuda:0")
 
 
 '''
