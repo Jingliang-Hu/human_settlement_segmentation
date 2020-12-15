@@ -37,9 +37,9 @@ def train_rg(model, device, train, valid, n_epoch, criterion, optimizer, schedul
             loss.backward()
             optimizer.step()
             # statistics
-            running_loss += loss.item() * label.shape[0]
-        tra_loss[epoch] = running_loss / len(train) 
-        val_loss[epoch] = test_rg(model, device, valid.dataset.dataset, criterion)
+            running_loss += loss.item() * train.batch_size
+        tra_loss[epoch] = running_loss / len(train) / train.batch_size
+        val_loss[epoch] = test_rg(model, device, valid.dataset.dataset, criterion, train.batch_size)
                
         # update learning rate
         scheduler.step(val_loss[epoch])
@@ -193,22 +193,21 @@ def train(model, device, train, valid, n_epoch, criterion, optimizer, scheduler,
     return tra_loss, tra_acc, val_loss, val_acc, model_epoch, lr_rate
 
 
-def prediction(model, device, test_dat):
+def prediction(model, device, test_dat, batch_size):
     model.eval()
-    pred_loader = DataLoader(test_dat, batch_size=16)
+    pred_loader = DataLoader(test_dat, batch_size=batch_size)
     out_prediction = torch.zeros((test_dat.data.shape[0], test_dat.data.shape[2], test_dat.data.shape[3]))
     with torch.no_grad():
         for i_batch, batch in tqdm(enumerate(pred_loader)):
             data = batch['data'].type(torch.float32).to(device)
             pred = model(data).type(torch.float32)
             _, predicted = torch.max(pred.data, 1)
-            out_prediction[i_batch:i_batch+data.shape[0],:,:] = predicted
-    print(torch.unique(out_prediction))
+            out_prediction[i_batch*batch_size:(i_batch+1)*batch_size,:,:,:] = predicted
     return out_prediction
 
-def prediction_rg(model, device, test_dat):
+def prediction_rg(model, device, test_dat, batch_size):
     model.eval()
-    pred_loader = DataLoader(test_dat, batch_size=16)
+    pred_loader = DataLoader(test_dat, batch_size=batch_size)
     out_prediction = torch.zeros((test_dat.data.shape[0],3,test_dat.data.shape[2], test_dat.data.shape[3]))
     
     softmax = nn.Softmax(dim=1)
@@ -217,16 +216,16 @@ def prediction_rg(model, device, test_dat):
             data = batch['data'].type(torch.float32).to(device)
             pred = model(data).type(torch.float32)
             pred = softmax(pred)
-            out_prediction[i_batch:i_batch+data.shape[0],:,:,:] = pred
+            out_prediction[i_batch*batch_size:(i_batch+1)*batch_size,:,:,:] = pred
     return out_prediction
 
 
 
-def test_rg(model, device, test_dat, criterion):
+def test_rg(model, device, test_dat, criterion, batch_size):
     model.eval()
-    pred_loader = DataLoader(test_dat, batch_size=1)
-
+    pred_loader = DataLoader(test_dat, batch_size=batch_size)
     running_loss = 0.0
+    softmax = nn.Softmax(dim=1)
     with torch.no_grad():
         for i_batch, batch in enumerate(pred_loader):
             # data and label for forward proporgation
@@ -234,11 +233,11 @@ def test_rg(model, device, test_dat, criterion):
             label = batch['label'].type(torch.float32).to(device)
             pred = model(data).type(torch.float32)
             # reshape label and prediction to exclude no label pixels
-            loss = criterion(pred, label-1)
+            pred = softmax(pred)
+            loss = criterion(pred, label)
             # statistics
-            running_loss += loss.item() * label.shape[0]
-            
-        testLoss = running_loss/len(pred_loader)
+            running_loss += loss.item() * batch_size 
+        testLoss = running_loss/len(pred_loader)/batch_size
     return testLoss
 
 

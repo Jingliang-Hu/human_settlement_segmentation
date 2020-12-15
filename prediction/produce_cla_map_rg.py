@@ -22,7 +22,7 @@ from osgeo import gdal
 model_directory = '../experiments/test/unet_regression_test_debug_run_outcome_2020-12-15_08-54-10/model'
 data_directory  = '../data/23083_autumn.tif'
 out_map_directory = '../data/new_york_test_map.tif'
-patch_size = 256
+patch_size = 32
 model_type = model_directory.split('/')[-2].split('_')[0]
 cudaNow = torch.device("cuda:0")
 
@@ -53,15 +53,14 @@ if model_type == 'unet':
     predict_model = unet.UNet(pred_dat.data.shape[1], 3).to(cudaNow)
 
 predict_model.load_state_dict(torch.load(model_directory, map_location=cudaNow))
-predictions = train.prediction_rg(predict_model, cudaNow, pred_dat)
+predictions = train.prediction_rg(predict_model, cudaNow, pred_dat, batch_size=256)
 predictions = predictions.numpy()
-print(np.unique(predictions))
 
 '''
 step 4: save inferencing
 '''
 
-geo.save_regression_inference(out_map_directory, predictions, img_coord)
+final_map = geo.save_regression_inference(out_map_directory, predictions, img_coord)
 
 
 

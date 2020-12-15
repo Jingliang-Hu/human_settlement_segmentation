@@ -128,7 +128,7 @@ def save_regression_inference(out_geotiff, prediction, img_coord):
         outBand.WriteArray(pred[i,:,:])
         outBand.FlushCache()
     del(outBand)
-
+    return pred
 
 
 def save_prediction_inference(out_geotiff, prediction, img_coord):

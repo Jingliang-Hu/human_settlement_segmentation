@@ -19,7 +19,7 @@ PARAMETER SETTING
 print("parameter setting ...")
 paraDict = {
         ### network parameters
-        "batch_size": 1,
+        "batch_size": 256,
         "n_epoch": 100,
         "training_patient": 20,
         "lr_rate": 0.1,
