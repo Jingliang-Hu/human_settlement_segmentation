@@ -203,7 +203,20 @@ def prediction(model, device, test_dat):
             out_prediction[i_batch:i_batch+data.shape[0],:,:] = predicted
     print(torch.unique(out_prediction))
     return out_prediction
-            
+
+def prediction_rg(model, device, test_dat):
+    model.eval()
+    pred_loader = DataLoader(test_dat, batch_size=16)
+    out_prediction = torch.zeros((test_dat.data.shape[0],3,test_dat.data.shape[2], test_dat.data.shape[3]))
+    
+    with torch.no_grad():
+        for i_batch, batch in tqdm(enumerate(pred_loader)):
+            data = batch['data'].type(torch.float32).to(device)
+            pred = model(data).type(torch.float32)
+            out_prediction[i_batch:i_batch+data.shape[0],:,:,:] = predicted
+    return out_prediction
+
+
 
 def test_rg(model, device, test_dat, criterion):
     model.eval()
