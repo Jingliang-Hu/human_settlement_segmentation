@@ -21,16 +21,16 @@ paraDict = {
         ### network parameters
         "batch_size": 1,
         "n_epoch": 100,
-        "patient": 10,
+        "training_patient": 20,
         "lr_rate": 0.1,
         "lr_rate_patient": 5,
-        "val_percent": 0.1,
+        "val_percent": 0.2,
         "save_best_model": 1,
         ### data loading parameters
         #"trainData": "lcz42", # training data could be the training data of LCZ42 data, or data of one of the cultural-10 city
-        "trainData": env_path+"/data/nairobi.h5",
+        "trainData": env_path+"/data/00010_23083_NewYork_Patch_32_LabPerc_70_bal.h5",
         #"testData": "cul10",  # testing data could be all the data of the cultural-10 cities, or one of them.
-        "testData": env_path+"/data/nairobi.h5",
+        "testData": env_path+"/data/00010_23083_NewYork_Patch_32_LabPerc_70_bal.h5",
         ### model name
         "backbone_model": 'unet',
         "exper_description": 'test_debug_run',
@@ -73,7 +73,8 @@ STEP THREE: Define a loss function and optimizer
 '''
 import torch.optim as optim
 import torch.nn as nn
-criterion = nn.CrossEntropyLoss()
+classWeight = torch.tensor([0,1/3,1/3,1/3]).to(cudaNow)
+criterion = nn.CrossEntropyLoss(weight=classWeight)
 optimizer = optim.Adam(model.parameters(), lr=paraDict["lr_rate"])
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=paraDict["lr_rate_patient"], threshold=0.0001)
 
@@ -83,14 +84,16 @@ STEP FOUR: Train the network
 # import modelOperation
 import train
 print('Start training ...')
-traLoss, traArry, valLoss, valArry, model_epoch = train.train(model, cudaNow, train_loader, valid_loader, paraDict["n_epoch"], criterion, optimizer, scheduler, save_best_model=paraDict["save_best_model"], model_dir=model_dir)
+traLoss, traArry, valLoss, valArry, model_epoch = train.train_alpha(model, cudaNow, train_loader, valid_loader, paraDict["n_epoch"], criterion, optimizer, scheduler, save_best_model=paraDict["save_best_model"], model_dir=model_dir, patient=paraDict["training_patient"])
 
 '''
 STEP FIVE: Prediction and calculate the metrics
 '''
 print('Start prediction ...')
 predict_model.load_state_dict(torch.load(model_dir, map_location=cudaNow))
-predictions, test_loss, test_accuracy = train.test(predict_model, cudaNow, pred_dat, criterion)
+test_loss, test_accuracy = train.test_alpha(predict_model, cudaNow, pred_dat, criterion)
+
+predictions = train.prediction(predict_model, cudaNow, pred_dat)
 predictions = predictions.numpy()
 label_tmp = pred_dat.label.copy()
 

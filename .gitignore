@@ -2,6 +2,8 @@
 env_path
 # ignore data files
 *.h5
+# ignore goetiff files
+**/*.tiff
 # ignore zip files
 *.zip
 # ignore python compile
