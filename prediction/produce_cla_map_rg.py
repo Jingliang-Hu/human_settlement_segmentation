@@ -19,7 +19,7 @@ from osgeo import gdal
 #
 # Parameter setting
 #
-model_directory = '../experiments/test/unet_regression_test_debug_run_outcome_2020-12-15_08-54-10/model'
+model_directory = '../experiments/test/unet_regression_test_debug_run_outcome_2020-12-16_09-56-38/model'
 data_directory  = '../data/23083_autumn.tif'
 out_map_directory = '../data/new_york_test_map.tif'
 patch_size = 32

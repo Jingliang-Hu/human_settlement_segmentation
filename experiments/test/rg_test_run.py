@@ -91,7 +91,7 @@ STEP FIVE: Prediction and calculate the metrics
 '''
 print('Start prediction ...')
 predict_model.load_state_dict(torch.load(model_dir, map_location=cudaNow))
-test_loss = train.test_rg(predict_model, cudaNow, pred_dat, criterion)
+test_loss = train.test_rg(predict_model, cudaNow, pred_dat, criterion,batch_size=paraDict["batch_size"])
 
 '''
 STEP SIX: Save the model and accuracy

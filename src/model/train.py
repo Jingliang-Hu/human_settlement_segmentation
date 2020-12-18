@@ -19,7 +19,7 @@ def train_rg(model, device, train, valid, n_epoch, criterion, optimizer, schedul
     val_loss = np.zeros(n_epoch)
     lr_rate = np.zeros(n_epoch)
     model_epoch = 0
-    softmax = nn.Softmax(dim=1)
+    #softmax = nn.Softmax(dim=1)
     for epoch in range(n_epoch):
         running_loss = 0.0
         correct = 0.0
@@ -30,7 +30,6 @@ def train_rg(model, device, train, valid, n_epoch, criterion, optimizer, schedul
             data = batch['data'].type(torch.float32).to(device)
             label = batch['label'].type(torch.float32).to(device)
             pred = model(data).type(torch.float32)
-            pred = softmax(pred)
             # back proporgation
             optimizer.zero_grad()
             loss = criterion(pred, label)
@@ -40,24 +39,20 @@ def train_rg(model, device, train, valid, n_epoch, criterion, optimizer, schedul
             running_loss += loss.item() * train.batch_size
         tra_loss[epoch] = running_loss / len(train) / train.batch_size
         val_loss[epoch] = test_rg(model, device, valid.dataset.dataset, criterion, train.batch_size)
-               
         # update learning rate
         scheduler.step(val_loss[epoch])
         print('epoch %d: training loss: %.6f; validation loss: %.6f; learning rate: %.6f' % (epoch+1, tra_loss[epoch], val_loss[epoch], lr_rate[epoch]))
-
         # save the model that has the lowest validation loss
         model_save_flag = save_best_model_func(model, save_best_model, model_dir, epoch, val_loss)
         model_epoch = epoch if model_save_flag else model_epoch
-        
         # training early stop
         if patient>=n_epoch:
             continue
         elif epoch <= patient:
             continue
-        elif (val_loss[epoch-patient]<val_loss[epoch-patient+1:epoch+1]).all():
+        elif (val_loss[epoch-patient]<=val_loss[epoch-patient+1:epoch+1]).all():
             print('Early stopping patient (%d) reached' % (patient))
             break
-        
     return tra_loss, val_loss, model_epoch, lr_rate
 
 
@@ -126,7 +121,7 @@ def train_alpha(model, device, train, valid, n_epoch, criterion, optimizer, sche
 
 
 
-def train(model, device, train, valid, n_epoch, criterion, optimizer, scheduler, save_best_model=1, model_dir='./model', patient=10):
+def train_cl(model, device, train, valid, n_epoch, criterion, optimizer, scheduler, save_best_model=1, model_dir='./model', patient=10):
     print('training started ...')
     tra_loss = np.zeros(n_epoch)
     val_loss = np.zeros(n_epoch)
@@ -148,39 +143,28 @@ def train(model, device, train, valid, n_epoch, criterion, optimizer, scheduler,
             data = batch['data'].type(torch.float32).to(device)
             label = batch['label'].type(torch.long).to(device)
             pred = model(data).type(torch.float32)
-
-            # reshape label and prediction to exclude no label pixels
-            label = label.reshape(label.shape[0],label.shape[1]*label.shape[2])
-            pred  = pred.reshape(pred.shape[0],pred.shape[1],pred.shape[2]*pred.shape[3])
-            mask = label[0,:]>0
-            label = label[:,mask]
-            pred  = pred[:,:,mask]
-
             _, predicted = torch.max(pred.data, 1)
             # back proporgation
             optimizer.zero_grad()
-            loss = criterion(pred, label-1)
+            loss = criterion(pred, label)
             loss.backward()
             optimizer.step()
-
             # statistics
-            running_loss += loss.item() * torch.sum(mask).item()
-            correct += torch.sum((label-1)==predicted).item()
-            total_pred += torch.sum(mask).item()
+            true_label = torch.max(label, 1)
+            correct += torch.sum(true_label==predicted).item()
+            total_pred += data.shape[0] * data.shape[2] * data.shape[3]
+            running_loss += loss.item() * data.shape[0]
 
         tra_loss[epoch] = running_loss / total_pred
         tra_acc[epoch] = correct/total_pred
-        val_loss[epoch], val_acc[epoch] = test(model, device, valid.dataset.dataset, criterion)
-
+        val_loss[epoch], val_acc[epoch] = test_cl(model, device, valid.dataset.dataset, criterion)
 
         # update learning rate
         scheduler.step(val_loss[epoch])
         print('epoch %d: training loss: %.6f; training acc: %.6f; validation loss: %.6f; validation acc: %.6f; learning rate: %.6f' % (epoch+1, tra_loss[epoch], tra_acc[epoch], val_loss[epoch], val_acc[epoch], lr_rate[epoch]))
-
         # save the model that has the lowest validation loss
         model_save_flag = save_best_model_func(model, save_best_model, model_dir, epoch, val_loss)
         model_epoch = epoch if model_save_flag else model_epoch
-
         # training early stop
         if patient>=n_epoch:
             continue
@@ -189,8 +173,8 @@ def train(model, device, train, valid, n_epoch, criterion, optimizer, scheduler,
         elif (val_loss[epoch-patient]<val_loss[epoch-patient+1:epoch+1]).all():
             print('Early stopping patient (%d) reached' % (patient))
             break
-
     return tra_loss, tra_acc, val_loss, val_acc, model_epoch, lr_rate
+
 
 
 def prediction(model, device, test_dat, batch_size):
@@ -225,7 +209,7 @@ def test_rg(model, device, test_dat, criterion, batch_size):
     model.eval()
     pred_loader = DataLoader(test_dat, batch_size=batch_size)
     running_loss = 0.0
-    softmax = nn.Softmax(dim=1)
+    #softmax = nn.Softmax(dim=1)
     with torch.no_grad():
         for i_batch, batch in enumerate(pred_loader):
             # data and label for forward proporgation
@@ -233,7 +217,7 @@ def test_rg(model, device, test_dat, criterion, batch_size):
             label = batch['label'].type(torch.float32).to(device)
             pred = model(data).type(torch.float32)
             # reshape label and prediction to exclude no label pixels
-            pred = softmax(pred)
+            #pred = softmax(pred)
             loss = criterion(pred, label)
             # statistics
             running_loss += loss.item() * batch_size 
@@ -244,12 +228,9 @@ def test_rg(model, device, test_dat, criterion, batch_size):
 
 
 
-def test(model, device, test_dat, criterion):
-
+def test_cl(model, device, test_dat, criterion, batch_size=32):
     model.eval()
-
-    pred_loader = DataLoader(test_dat, batch_size=1)
-
+    pred_loader = DataLoader(test_dat, batch_size=batch_size)
     running_loss = 0.0
     correct = 0.0
     total_pred = 0.0
@@ -260,26 +241,16 @@ def test(model, device, test_dat, criterion):
             data = batch['data'].type(torch.float32).to(device)
             label = batch['label'].type(torch.long).to(device)
             pred = model(data).type(torch.float32)
-
-            # reshape label and prediction to exclude no label pixels
-            label = label.reshape(label.shape[0],label.shape[1]*label.shape[2])
-            pred  = pred.reshape(pred.shape[0],pred.shape[1],pred.shape[2]*pred.shape[3])
-            mask = label[0,:]>0
-            label = label[:,mask]
-            pred  = pred[:,:,mask]
-
             _, predicted = torch.max(pred.data, 1)
-            loss = criterion(pred, label-1)
-
+            true_label = torch.max(label, 1)
+            loss = criterion(pred, label)
             # statistics
-            running_loss += loss.item() * torch.sum(mask).item()
-            correct += torch.sum((label-1)==predicted).item()
-            total_pred += torch.sum(mask).item()
+            running_loss += loss.item() * data.shape[0]
+            correct += torch.sum(true_label==predicted).item()
+            total_pred += data.shape[0]*data.shape[2]*data.shape[3]
 
     testLoss = running_loss/total_pred
     accuracy = correct/total_pred
-
-
     return testLoss, accuracy
 
 

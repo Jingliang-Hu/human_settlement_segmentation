@@ -19,7 +19,7 @@ PARAMETER SETTING
 print("parameter setting ...")
 paraDict = {
         ### network parameters
-        "batch_size": 1,
+        "batch_size": 256,
         "n_epoch": 100,
         "training_patient": 20,
         "lr_rate": 0.1,
@@ -28,15 +28,15 @@ paraDict = {
         "save_best_model": 1,
         ### data loading parameters
         #"trainData": "lcz42", # training data could be the training data of LCZ42 data, or data of one of the cultural-10 city
-        "trainData": env_path+"/data/00010_23083_NewYork_Patch_32_LabPerc_70_bal.h5",
+        "trainData": env_path+"/data/00010_23083_NewYork_Patch_32_LabPerc_100.h5",
         #"testData": "cul10",  # testing data could be all the data of the cultural-10 cities, or one of them.
-        "testData": env_path+"/data/00010_23083_NewYork_Patch_32_LabPerc_70_bal.h5",
+        "testData": env_path+"/data/00010_23083_NewYork_Patch_32_LabPerc_100.h5",
         ### model name
         "backbone_model": 'unet',
         "solution": 'classification',
         "exper_description": 'test_debug_run',
         }
-cudaNow = torch.device("cuda:2")
+cudaNow = torch.device("cuda:0")
 
 '''
 record experiment parameters
@@ -66,16 +66,17 @@ STEP TWO: initial deep model
 '''
 import unet
 if paraDict["backbone_model"] == 'unet':
-    model = unet.UNet(data_training.data.shape[1], 4).to(cudaNow)
-    predict_model = unet.UNet(data_training.data.shape[1], 4).to(cudaNow)
+    model = unet.UNet(data_training.data.shape[1], 3).to(cudaNow)
+    predict_model = unet.UNet(data_training.data.shape[1], 3).to(cudaNow)
 
 '''
 STEP THREE: Define a loss function and optimizer
 '''
 import torch.optim as optim
 import torch.nn as nn
-classWeight = torch.tensor([0,1/3,1/3,1/3]).to(cudaNow)
-criterion = nn.CrossEntropyLoss(weight=classWeight)
+# classWeight = torch.tensor([0,1/3,1/3,1/3]).to(cudaNow)
+# criterion = nn.CrossEntropyLoss(weight=classWeight)
+criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=paraDict["lr_rate"])
 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=paraDict["lr_rate_patient"], threshold=0.0001)
 
@@ -85,7 +86,7 @@ STEP FOUR: Train the network
 # import modelOperation
 import train
 print('Start training ...')
-traLoss, traArry, valLoss, valArry, model_epoch = train.train_alpha(model, cudaNow, train_loader, valid_loader, paraDict["n_epoch"], criterion, optimizer, scheduler, save_best_model=paraDict["save_best_model"], model_dir=model_dir, patient=paraDict["training_patient"])
+traLoss, traArry, valLoss, valArry, model_epoch = train.train_cl(model, cudaNow, train_loader, valid_loader, paraDict["n_epoch"], criterion, optimizer, scheduler, save_best_model=paraDict["save_best_model"], model_dir=model_dir, patient=paraDict["training_patient"])
 
 '''
 STEP FIVE: Prediction and calculate the metrics
