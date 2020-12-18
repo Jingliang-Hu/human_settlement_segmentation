@@ -35,46 +35,35 @@ generate label:
 4: others, not buildings
 '''
 # assign a pixel with one class which has the maximum probability
-lab = np.argmax(dat,axis=0)+1
-# set the buildings without any label as zeros
-lab[lab[:]==4]=0
+dat = np.transpose(dat,[1,2,0])
+lab = np.argmax(dat[:,:,:3],axis=2)+1
 # set the non-building pixels as the class others
-sum_tmp = np.sum(dat,axis=0)
-lab[sum_tmp[:]==0]=0
+mask = np.sum(dat[:,:,:3],axis=2)>0
+lab[mask==0]=0
 
 
 '''
 patch location indication
 '''
-
-patch_label_perc = 1 
+patch_label_perc_thres = 1 
 patch_size = 32
-patch_label_nb_thres = np.round(patch_size * patch_size * patch_label_perc).astype(np.int32)
 half_patch = np.array(patch_size/2).astype(np.int8)
 
 # setting overlaping rate of adjacent data patches
 shift_perc = 0.1
 shift_gap = np.round(patch_size * shift_perc).astype(np.int64)
 
-# indication of where are the labels for the first three classes
-lab_tmp = np.logical_and((lab>0), (lab<4))
+# calculating the labeling percentage of each data patch
+lab_idx = uil.patch_labeling_percentage(mask, patch_size)
+lab_idx = lab_idx >= patch_label_perc_thres
 
-# find the center points of patches whose labeled contents occupy a percentage higher than setting
-lab_tmp_pad = np.pad(lab_tmp,((half_patch,half_patch),(half_patch,half_patch))).astype(np.int32)
-lab_idx = np.zeros(lab_tmp_pad.shape).astype(np.int32)
-print('Calculating the patch label percentage:')
-for i in tqdm(range(-half_patch,half_patch)):
-    rotation = np.roll(lab_tmp_pad,i,axis=0)
-    for j in range(-half_patch,half_patch):
-        lab_idx += np.roll(rotation,j,axis=1)
-
-lab_idx = (lab_idx >= patch_label_nb_thres) * lab_idx
-lab_idx = lab_idx[half_patch:-half_patch,half_patch:-half_patch]
-
+# find the image coordinate
 nb_patches = np.sum(lab_idx>0)
 order_img_coord = np.unravel_index(np.argsort(lab_idx, axis=None), lab_idx.shape)
 order_img_coord = np.transpose(np.stack((np.flip(order_img_coord[0]),np.flip(order_img_coord[1])),axis=0))
 order_img_coord = order_img_coord[:nb_patches,:]
+
+# get rid of data patches that are too closed to each other
 i=0
 while i<order_img_coord.shape[0]:
     neibor_south_idx = np.logical_and((order_img_coord[:,0]>order_img_coord[i,0]), (order_img_coord[:,0]<order_img_coord[i,0]+shift_gap))
@@ -113,7 +102,7 @@ print(lab_patch.shape)
 save data patches
 '''
 city = data_dir.split('/')[-3]
-file_name = city+'_Patch_'+str(patch_size)+'_LabPerc_'+str(int(patch_label_perc*100))+'.h5'
+file_name = city+'_Patch_'+str(patch_size)+'_LabPerc_'+str(int(patch_label_perc_thres*100))+'.h5'
 
 f = h5py.File(file_name,'w')
 f.create_dataset("dat", data=dat_patch)

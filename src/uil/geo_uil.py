@@ -1,6 +1,7 @@
 from tqdm import tqdm
 from osgeo import gdal, osr, ogr
 import numpy as np
+from tqdm import tqdm
 
 def image_coord_2_world_coord(img_coord, geo_file):
     '''
@@ -119,11 +120,11 @@ def cut_patch_from_array(dat, img_coord, patch_size):
     if bnd == 1:
         data_patches = np.zeros((img_coord.shape[0],patch_size,patch_size))
         for i in tqdm(range(0, img_coord.shape[0])):
-            data_patches[i,:,:] = dat[img_coord[i,0]-half_patch_size:img_coord[i,0]+half_patch_size,img_coord[i,1]-half_patch_size:img_coord[i,1]+half_patch_size]
+            data_patches[i,:,:] = dat[img_coord[i,0]-half_patch_size+1:img_coord[i,0]+half_patch_size+1,img_coord[i,1]-half_patch_size+1:img_coord[i,1]+half_patch_size+1]
     else:
         data_patches = np.zeros((img_coord.shape[0],patch_size,patch_size,bnd))
         for i in tqdm(range(0, img_coord.shape[0])):
-            data_patches[i,:,:,:] = dat[img_coord[i,0]-half_patch_size:img_coord[i,0]+half_patch_size,img_coord[i,1]-half_patch_size:img_coord[i,1]+half_patch_size,:]
+            data_patches[i,:,:,:] = dat[img_coord[i,0]-half_patch_size+1:img_coord[i,0]+half_patch_size+1,img_coord[i,1]-half_patch_size+1:img_coord[i,1]+half_patch_size+1,:]
 
 
     return data_patches, in_boundary_index
@@ -162,12 +163,36 @@ def cut_patch(geo_file, img_coord, patch_size):
     img_coord = img_coord[in_boundary_index,:]
 
     for i in tqdm(range(0, img_coord.shape[0])):
-        data_patches[i,:,:,:] = dat[img_coord[i,0]-half_patch_size:img_coord[i,0]+half_patch_size,img_coord[i,1]-half_patch_size:img_coord[i,1]+half_patch_size,:]
+        data_patches[i,:,:,:] = dat[img_coord[i,0]-half_patch_size+1:img_coord[i,0]+half_patch_size+1,img_coord[i,1]-half_patch_size+1:img_coord[i,1]+half_patch_size+1,:]
 
     return data_patches, in_boundary_index
 
 
 
+def patch_labeling_percentage(label_mask, patch_size):
+    '''
+    This function calculate the labeling percentage of a data patch with the given patch size
+    Input:
+        - label_mask        -- a 2D binary array indicating where labels are
+        - patch_size        -- the size of a data patch
+    Output:
+        - label_perc        -- a 2D binary array indicating labeling percentage of a data patch
+    '''
+    # indication of where are the labels for the first three classes
+    lab_tmp = label_mask
+    half_patch = np.array(patch_size/2).astype(np.int8)
+    # find the center points of patches whose labeled contents occupy a percentage higher than setting
+    lab_tmp_pad = np.pad(lab_tmp,((half_patch,half_patch),(half_patch,half_patch))).astype(np.int32)
+    lab_idx = np.zeros(lab_tmp_pad.shape).astype(np.int32)
+    print('Calculating the patch label percentage:')
+    for i in tqdm(range(-half_patch,half_patch)):
+        rotation = np.roll(lab_tmp_pad,i,axis=0)
+        for j in range(-half_patch,half_patch):
+            lab_idx += np.roll(rotation,j,axis=1)
+
+    lab_idx = lab_idx[half_patch:-half_patch,half_patch:-half_patch]
+    label_perc = lab_idx/(patch_size*patch_size)
+    return label_perc
 
 
 
