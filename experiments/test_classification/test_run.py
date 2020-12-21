@@ -86,14 +86,14 @@ STEP FOUR: Train the network
 # import modelOperation
 import train
 print('Start training ...')
-traLoss, traArry, valLoss, valArry, model_epoch = train.train_cl(model, cudaNow, train_loader, valid_loader, paraDict["n_epoch"], criterion, optimizer, scheduler, save_best_model=paraDict["save_best_model"], model_dir=model_dir, patient=paraDict["training_patient"])
+traLoss, traArry, valLoss, valArry, model_epoch, learning_rate = train.train_cl(model, cudaNow, train_loader, valid_loader, paraDict["n_epoch"], criterion, optimizer, scheduler, save_best_model=paraDict["save_best_model"], model_dir=model_dir, patient=paraDict["training_patient"])
 
 '''
 STEP FIVE: Prediction and calculate the metrics
 '''
 print('Start prediction ...')
 predict_model.load_state_dict(torch.load(model_dir, map_location=cudaNow))
-test_loss, test_accuracy = train.test_alpha(predict_model, cudaNow, pred_dat, criterion)
+test_loss, test_accuracy = train.test_cl(predict_model, cudaNow, pred_dat, criterion)
 
 predictions = train.prediction(predict_model, cudaNow, pred_dat)
 predictions = predictions.numpy()
@@ -133,6 +133,7 @@ fid.create_dataset('traArry',data=traArry)
 fid.create_dataset('valLoss',data=valLoss)
 fid.create_dataset('valArry',data=valArry)
 fid.create_dataset('model_epoch',data=model_epoch)
+fid.create_dataset('learning_rate',data=learning_rate)
 fid.close()
 
 fid = h5py.File(os.path.join(outcomeDir,'test_accuracy.h5'),'w')

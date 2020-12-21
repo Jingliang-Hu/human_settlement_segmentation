@@ -43,7 +43,7 @@ class data_set(Dataset):
         return sample
 
     def loadData(self):
-        f = h5py.File(self.data_dir)
+        f = h5py.File(self.data_dir,'r')
         self.data = np.array(f['dat'])
         self.data = np.transpose(self.data, (0,3,1,2))
 

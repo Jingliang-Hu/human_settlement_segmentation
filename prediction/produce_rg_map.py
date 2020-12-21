@@ -21,7 +21,7 @@ from osgeo import gdal
 #
 model_directory = '../experiments/test/unet_regression_test_debug_run_outcome_2020-12-16_09-56-38/model'
 data_directory  = '../data/23083_autumn.tif'
-out_map_directory = '../data/new_york_test_map.tif'
+out_map_directory = 'new_york_regression_map.tif'
 patch_size = 32
 model_type = model_directory.split('/')[-2].split('_')[0]
 cudaNow = torch.device("cuda:0")
