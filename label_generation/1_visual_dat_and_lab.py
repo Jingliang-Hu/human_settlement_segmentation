@@ -1,14 +1,20 @@
+import glob
 from PIL import Image
 import numpy as np
 import h5py
+import sys
 
 
-h5py_file = '00097_21711_Nairobi_Patch_32_LabPerc_70.h5'
-out_dirs = 'visualization/'
+city = '00005_21206_Mumbai'
+city = sys.argv[1]
+
+h5py_file = '../data/data_patch/'+city+'/*.h5'
+h5py_file = glob.glob('../data/data_patch/'+city+'/*.h5')[0]
+out_dirs = '../data/data_patch/'+city+'/'
 
 f = h5py.File(h5py_file,'r')
-dat = np.array(f['dat_patch'])
-lab = np.array(f['lab_patch'])
+dat = np.array(f['dat'])
+lab = np.array(f['lab'])
 f.close()
 
 nb_patch = dat.shape[0]

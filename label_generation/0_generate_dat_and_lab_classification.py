@@ -8,17 +8,15 @@ import geo_uil as uil
 from osgeo import gdal
 from tqdm import tqdm
 
-
 '''
 load 10 meter GSD label
 '''
-# Nairobi
-label_dir = '00097_21711_nairobi_10m.tif'
-data_dir = '/datastore/DATA/classification/SEN2/global_utm/00097_21711_Nairobi/autumn/21711_autumn.tif'
+label_dir = '/datastore/exchange/jingliang/human_settlement_segmentation/data/lcz_osm_rasters/00005_21206_mumbai.tif.tif'
+label_dir = sys.argv[1]
 
-# New York
-label_dir ='00010_23083_newyork_10m.tif' 
-data_dir  ='/datastore/DATA/classification/SEN2/global_utm/00010_23083_NewYork/autumn/23083_autumn.tif'
+data_dir = '/datastore/DATA/classification/SEN2/global_utm/00005_21206_Mumbai/autumn/21206_autumn.tif'
+data_dir = sys.argv[2]
+
 
 f = gdal.Open(label_dir)
 dat = f.ReadAsArray()
@@ -32,25 +30,25 @@ generate label:
 1: commercial buildings
 2: industrial buildings
 3: residential buildings
-4: others, not buildings
+4: others buildings
 '''
 # assign a pixel with one class which has the maximum probability
 dat = np.transpose(dat,[1,2,0])
-lab = np.argmax(dat[:,:,:3],axis=2)+1
+lab = np.argmax(dat,axis=2)+1
 # set the non-building pixels as the class others
-mask = np.sum(dat[:,:,:3],axis=2)>0
+mask = np.sum(dat,axis=2)>0
 lab[mask==0]=0
 
 
 '''
 patch location indication
 '''
-patch_label_perc_thres = 1 
+patch_label_perc_thres = 0.7 
 patch_size = 32
 half_patch = np.array(patch_size/2).astype(np.int8)
 
 # setting overlaping rate of adjacent data patches
-shift_perc = 0.1
+shift_perc = 0.2
 shift_gap = np.round(patch_size * shift_perc).astype(np.int64)
 
 # calculating the labeling percentage of each data patch
@@ -62,6 +60,7 @@ nb_patches = np.sum(lab_idx>0)
 order_img_coord = np.unravel_index(np.argsort(lab_idx, axis=None), lab_idx.shape)
 order_img_coord = np.transpose(np.stack((np.flip(order_img_coord[0]),np.flip(order_img_coord[1])),axis=0))
 order_img_coord = order_img_coord[:nb_patches,:]
+
 
 # get rid of data patches that are too closed to each other
 i=0
@@ -102,7 +101,12 @@ print(lab_patch.shape)
 save data patches
 '''
 city = data_dir.split('/')[-3]
-file_name = city+'_Patch_'+str(patch_size)+'_LabPerc_'+str(int(patch_label_perc_thres*100))+'.h5'
+
+out_directory = '../data/data_patch/'+city
+if not os.path.exists(out_directory):
+    os.makedirs(out_directory)
+
+file_name = out_directory+'/PatchSz'+str(patch_size)+'_LabPerc'+str(int(patch_label_perc_thres*100))+'.h5'
 
 f = h5py.File(file_name,'w')
 f.create_dataset("dat", data=dat_patch)
