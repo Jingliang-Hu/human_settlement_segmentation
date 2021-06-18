@@ -195,4 +195,59 @@ def patch_labeling_percentage(label_mask, patch_size):
     return label_perc
 
 
+class dataAndLabel():
+    def __init__(self, dir2label, dir2data, patchsize, interval):
+        if os.path.exists(dir2label):
+            self.dir2label = dir2label
+        else:
+            print('The given label file does not exist')
+            return 1
+
+        if os.path.exists(dir2data):
+            self.dir2data = dir2data
+        else:
+            print('The given data file does not exist')
+            return 1
+
+        self.patchsize = patchsize
+        self.interval = interval
+        return 0
+
+    def getDataGSD():
+        f = gdal.Open(self.dir2data)
+        gMatrix = f.GetGeoTransform()
+        f.close()
+        x_gsd = gMatrix[1]
+        y_gsd = gMatrix[5]
+        if y_gsd!=-x_gsd:
+            print('Ground sampling distances are different on x and y directions, GSD on x direction is returned.')
+        return x_gsd
+
+    def getLabelGSD():
+        f = gdal.Open(self.dir2label)
+        gMatrix = f.GetGeoTransform()
+        f.close()
+        x_gsd = gMatrix[1]
+        y_gsd = gMatrix[5]
+        if y_gsd!=-x_gsd:
+            print('Ground sampling distances are different on x and y directions, GSD on x direction is returned.')
+        return x_gsd
+
+    def dataUpsampling():
+        return('to be constructed')
+
+
+    def cutData():
+        f = gdal.Open(self.dir2label)
+        lab = f.ReadAsArray()
+        [x0,x_res,_,y0,_,y_res] = f.GetGeoTransform()
+
+        f_dat = gdal.Open(self.dir2data)
+        dat = f_dat.ReadAsArray()
+        [xd0,xd_res,_,yd0,_,yd_res] = f_dat.GetGeoTransform()
+        print('Label information: tie point: {}, {}; resolution: {}, {}; image size: {}, {}'.format(x0,y0,x_res,y_res,f.RasterXSize, f.RasterYSize))
+        print(' Data information: tie point: {}, {}; resolution: {}, {}; image size: {}, {}'.format(xd0,yd0,xd_res,yd_res,f_dat.RasterXSize, f_dat.RasterYSize))
+        # for x_idx in range(0,f.RasterXSize-self.patchsize,self.interval):
+           # for y_idx in range(0,f.RasterYSize-self.patchsize,self.inverval):
+        return('to be constructed')
 
