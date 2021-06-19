@@ -19,12 +19,11 @@ from osgeo import gdal
 #
 # Parameter setting
 #
-model_directory = '../experiments/test_classification/unet_classification_test_debug_run_outcome_2020-12-21_14-21-18/model'
+model_directory = '../experiments/test/unet_regression_test_debug_run_outcome_2020-12-16_09-56-38/model'
 data_directory  = '../data/23083_autumn.tif'
-out_map_directory = 'new_york_classification_map.tif'
+out_map_directory = 'new_york_regression_map.tif'
 patch_size = 32
 model_type = model_directory.split('/')[-2].split('_')[0]
-print(model_type)
 cudaNow = torch.device("cuda:0")
 
 
@@ -32,7 +31,7 @@ cudaNow = torch.device("cuda:0")
 step 1: initial segmentation map
 '''
 print('initial geotiff file for segmentation map')
-geo.intial_geotiff_segmentation_map(data_directory, out_map_directory)
+geo.intial_geotiff_segmentation_prob_map(data_directory, out_map_directory)
 
 
 '''
@@ -54,15 +53,14 @@ if model_type == 'unet':
     predict_model = unet.UNet(pred_dat.data.shape[1], 3).to(cudaNow)
 
 predict_model.load_state_dict(torch.load(model_directory, map_location=cudaNow))
-predictions = train.prediction(predict_model, cudaNow, pred_dat)
+predictions = train.prediction_rg(predict_model, cudaNow, pred_dat, batch_size=256)
 predictions = predictions.numpy()
-print(np.unique(predictions))
 
 '''
 step 4: save inferencing
 '''
 
-geo.save_prediction_inference(out_map_directory, predictions, img_coord)
+final_map = geo.save_regression_inference(out_map_directory, predictions, img_coord)
 
 
 

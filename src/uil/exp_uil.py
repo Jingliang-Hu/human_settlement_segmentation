@@ -6,7 +6,7 @@ def initialOutputFolder(paraDict):
     # get time stamp
     now = datetime.now()
     timestamp = now.strftime("%Y-%m-%d_%H-%M-%S")
-    outcomeDir = paraDict["backbone_model"] + '_'+ paraDict["exper_description"] + '_outcome_' + timestamp
+    outcomeDir = paraDict["backbone_model"] + '_' + paraDict["solution"] + '_'+ paraDict["exper_description"] + '_outcome_' + timestamp
     # mkdir output folder
     os.mkdir(outcomeDir)
     return outcomeDir
