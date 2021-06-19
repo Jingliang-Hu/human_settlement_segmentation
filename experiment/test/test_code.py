@@ -28,9 +28,9 @@ paraDict = {
         "save_best_model": 1,
         ### data loading parameters
         #"trainData": "lcz42", # training data could be the training data of LCZ42 data, or data of one of the cultural-10 city
-        "trainData": env_path+"/data/00010_23083_NewYork_Patch_32_LabPerc_100.h5",
+        "trainData": env_path+"/data/train.h5",
         #"testData": "cul10",  # testing data could be all the data of the cultural-10 cities, or one of them.
-        "testData": env_path+"/data/00010_23083_NewYork_Patch_32_LabPerc_100.h5",
+        "testData": env_path+"/data/test.h5",
         ### model name
         "backbone_model": 'unet',
         "solution": 'classification',
