@@ -124,7 +124,7 @@ def train_alpha(model, device, train, valid, n_epoch, criterion, optimizer, sche
 
 
 
-def train_cl(model, device, train, valid, n_epoch, criterion, optimizer, scheduler, save_best_model=1, model_dir='./model', patient=10):
+def train_cl(model, device, train_loader, valid_loader, n_epoch, criterion, optimizer, scheduler, save_best_model=1, model_dir='./model', patient=10):
     print('training started ...')
     tra_loss = np.zeros(n_epoch)
     val_loss = np.zeros(n_epoch)
@@ -138,7 +138,7 @@ def train_cl(model, device, train, valid, n_epoch, criterion, optimizer, schedul
         correct = 0.0
         total_pred = 0.0
         lr_rate[epoch] = optimizer.param_groups[0]['lr']
-        for batch in tqdm(train):
+        for batch in tqdm(train_loader):
             # data and label for forward proporgation
             data = batch['data'].type(torch.float32).to(device)
             label = batch['label'].type(torch.long).to(device)
@@ -146,16 +146,16 @@ def train_cl(model, device, train, valid, n_epoch, criterion, optimizer, schedul
             _, predicted = torch.max(pred.data, 1)
             # back proporgation
             optimizer.zero_grad()
-            loss = criterion(pred, label-1)
+            loss = criterion(pred, label)
             loss.backward()
             optimizer.step()
             # statistics
-            correct += predicted.eq(label-1).sum().item()
+            correct += predicted.eq(label).sum().item()
             total_pred += data.shape[0] * data.shape[2] * data.shape[3]
             running_loss += loss.item() * data.shape[0]
         tra_loss[epoch] = running_loss / total_pred
         tra_acc[epoch] = correct/total_pred
-        val_loss[epoch], val_acc[epoch] = test_cl(model, device, valid.dataset.dataset, criterion)
+        val_loss[epoch], val_acc[epoch] = test_cl(model, device, valid_loader.dataset.dataset, criterion)
         # update learning rate
         scheduler.step(val_loss[epoch])
         print('epoch %d: training loss: %.6f; training acc: %.6f; validation loss: %.6f; validation acc: %.6f; learning rate: %.6f' % (epoch+1, tra_loss[epoch], tra_acc[epoch], val_loss[epoch], val_acc[epoch], lr_rate[epoch]))
@@ -183,7 +183,7 @@ def prediction(model, device, test_dat, batch_size):
             data = batch['data'].type(torch.float32).to(device)
             pred = model(data).type(torch.float32)
             _, predicted = torch.max(pred.data, 1)
-            out_prediction[i_batch*batch_size:(i_batch+1)*batch_size,:,:,:] = predicted
+            out_prediction[i_batch*pred.shape[0]:(i_batch+1)*pred.shape[0],:,:] = predicted
     return out_prediction
 
 def prediction_rg(model, device, test_dat, batch_size):
@@ -238,10 +238,10 @@ def test_cl(model, device, test_dat, criterion, batch_size=32):
             label = batch['label'].type(torch.long).to(device)
             pred = model(data).type(torch.float32)
             _, predicted = torch.max(pred.data, 1)
-            loss = criterion(pred, label-1)
+            loss = criterion(pred, label)
             # statistics
             running_loss += loss.item()*data.shape[0]
-            correct += predicted.eq(label-1).sum().item()
+            correct += predicted.eq(label).sum().item()
             total_pred += data.shape[0]*data.shape[2]*data.shape[3]
     testLoss = running_loss/total_pred
     accuracy = correct/total_pred

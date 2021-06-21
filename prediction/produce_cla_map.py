@@ -19,7 +19,7 @@ from osgeo import gdal
 #
 # Parameter setting
 #
-model_directory = '../experiments/test_classification/unet_classification_test_debug_run_outcome_2020-12-21_14-21-18/model'
+model_directory = '../experiments/test_classification/unet_classification_test_debug_run_outcome_2021-06-21_10-07-41/model'
 data_directory  = '../data/23083_autumn.tif'
 out_map_directory = 'new_york_classification_map.tif'
 patch_size = 32
@@ -51,7 +51,7 @@ import unet
 import train
 
 if model_type == 'unet':
-    predict_model = unet.UNet(pred_dat.data.shape[1], 3).to(cudaNow)
+    predict_model = unet.UNet(pred_dat.data.shape[1], 5).to(cudaNow)
 
 predict_model.load_state_dict(torch.load(model_directory, map_location=cudaNow))
 predictions = train.prediction(predict_model, cudaNow, pred_dat)

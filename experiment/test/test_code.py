@@ -22,7 +22,7 @@ paraDict = {
         "batch_size": 256,
         "n_epoch": 100,
         "training_patient": 20,
-        "lr_rate": 0.1,
+        "lr_rate": 0.01,
         "lr_rate_patient": 5,
         "val_percent": 0.2,
         "save_best_model": 1,
@@ -66,8 +66,8 @@ STEP TWO: initial deep model
 '''
 import unet
 if paraDict["backbone_model"] == 'unet':
-    model = unet.UNet(data_training.data.shape[1], 3).to(cudaNow)
-    predict_model = unet.UNet(data_training.data.shape[1], 3).to(cudaNow)
+    model = unet.UNet(data_training.data.shape[1], 5).to(cudaNow)
+    predict_model = unet.UNet(data_training.data.shape[1], 5).to(cudaNow)
 
 '''
 STEP THREE: Define a loss function and optimizer
@@ -95,7 +95,7 @@ print('Start prediction ...')
 predict_model.load_state_dict(torch.load(model_dir, map_location=cudaNow))
 test_loss, test_accuracy = train.test_cl(predict_model, cudaNow, pred_dat, criterion)
 
-predictions = train.prediction(predict_model, cudaNow, pred_dat)
+predictions = train.prediction(predict_model, cudaNow, pred_dat, paraDict["batch_size"])
 predictions = predictions.numpy()
 label_tmp = pred_dat.label.copy()
 
