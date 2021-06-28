@@ -1,1 +1,7 @@
 create a file with the name "env_path", and save the current directory in the file "env_path"
+
+Procedure:
+Step 1: Upsample 50m GSD OSM label to 10m GSD label so that it fits the GSD of Sentinel-2 images
+
+
+

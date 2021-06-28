@@ -5,6 +5,7 @@ env_path
 # ignore goetiff files
 **/*.tiff
 **/*.tif
+**/*.png
 # ignore zip files
 *.zip
 # ignore python compile
