@@ -1,9 +1,10 @@
 # ignore local environment setting
 env_path
 # ignore data files
-*.h5
+**/*.h5
 # ignore goetiff files
 **/*.tiff
+**/*.tif
 # ignore zip files
 *.zip
 # ignore python compile
