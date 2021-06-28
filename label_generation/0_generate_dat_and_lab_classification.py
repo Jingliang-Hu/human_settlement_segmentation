@@ -16,7 +16,9 @@ label_dir = sys.argv[1]
 
 data_dir = '/datastore/DATA/classification/SEN2/global_utm/00005_21206_Mumbai/autumn/21206_autumn.tif'
 data_dir = sys.argv[2]
-
+season = data_dir.split('/')[-1].split('.')[0].split('_')[-1]
+city = data_dir.split('/')[-3]
+print('Data of {} in {}'.format(city,season))
 
 f = gdal.Open(label_dir)
 dat = f.ReadAsArray()
@@ -91,22 +93,18 @@ dat_img_coord = uil.world_coord_2_image_coord(world_coord, data_dir)
 dat_patch, dat_in_boundary_index = uil.cut_patch(data_dir, dat_img_coord.astype(np.int32), patch_size)
 lab_patch = lab_patch[dat_in_boundary_index,:,:]
 
-print('Shape of data patch: ')
-print(dat_patch.shape)
-print('Shape of label patch: ')
-print(lab_patch.shape)
+print('Shape of data patch: {}'.format(dat_patch.shape))
+print('Shape of label patch: {}'.format(lab_patch.shape))
 
 
 '''
 save data patches
 '''
-city = data_dir.split('/')[-3]
-
 out_directory = '../data/data_patch/'+city
 if not os.path.exists(out_directory):
     os.makedirs(out_directory)
 
-file_name = out_directory+'/PatchSz'+str(patch_size)+'_LabPerc'+str(int(patch_label_perc_thres*100))+'.h5'
+file_name = out_directory+'/PatchSz'+str(patch_size)+'_LabPerc'+str(int(patch_label_perc_thres*100))+'_'+season+'.h5'
 
 f = h5py.File(file_name,'w')
 f.create_dataset("dat", data=dat_patch)
