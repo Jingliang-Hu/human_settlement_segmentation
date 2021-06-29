@@ -54,8 +54,8 @@ shift_perc = 0.2
 shift_gap = np.round(patch_size * shift_perc).astype(np.int64)
 
 # calculating the labeling percentage of each data patch
-lab_idx = uil.patch_labeling_percentage(mask, patch_size)
-lab_idx = lab_idx >= patch_label_perc_thres
+lab_perc = uil.patch_labeling_percentage(mask, patch_size)
+lab_idx = lab_perc >= patch_label_perc_thres
 
 # find the image coordinate
 nb_patches = np.sum(lab_idx>0)
