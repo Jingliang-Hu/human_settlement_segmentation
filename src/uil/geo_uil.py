@@ -182,7 +182,7 @@ def patch_labeling_percentage(label_mask, patch_size):
     lab_tmp = label_mask
     half_patch = np.array(patch_size/2).astype(np.int8)
     # find the center points of patches whose labeled contents occupy a percentage higher than setting
-    lab_tmp_pad = np.pad(lab_tmp,((half_patch,half_patch),(half_patch,half_patch))).astype(np.int32)
+    lab_tmp_pad = np.pad(lab_tmp,((half_patch,half_patch),(half_patch,half_patch)),mode='constant').astype(np.int32)
     lab_idx = np.zeros(lab_tmp_pad.shape).astype(np.int32)
     print('Calculating the patch label percentage:')
     for i in tqdm(range(-half_patch,half_patch)):

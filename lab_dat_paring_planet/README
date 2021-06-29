@@ -1,0 +1,14 @@
+0_upsample_osm_lab_2_GSD3m.py:
+Upsample the 10 meter GSD OSM label to 3 meter GSD label. output: WGS84/UTM zone; 
+
+
+0_upsample_planet_2_GSD3m.py
+Upsample the planet images to 3 meter GSD label. output: WGS84/UTM zone;
+
+
+1_lab_dat_paring.py
+Paring osm label and planet data. Label and data has to have the same GSD. If the resolution is very high, it takes a while to calculate the patch labeling percentage.
+
+
+1_lab_dat_paring_v2.py
+Paring osm label and planet data. Label and data does not has to have the same GSD. The correspondence is calculated based on coordinates and land areas. (label_GSD * label_patch_size)=(data_GSD * data_patch_size)
