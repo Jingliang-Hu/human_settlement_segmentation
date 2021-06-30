@@ -3,9 +3,9 @@ import h5py
 import numpy as np
 
 '''
-Merge all season data of cultural 10 cities as the training data, singapore and new york as the testing data
+Merge autumn data of cultural 10 cities as the training data, singapore and new york as the testing data
 '''
-h5_autumn_files = glob.glob('../data/data_patch/*/*_autumn.h5')
+h5_autumn_files = glob.glob('../data/s2_data_patch/*/*_autumn.h5')
 
 dat_list = []
 lab_list = []

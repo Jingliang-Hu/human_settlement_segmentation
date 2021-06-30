@@ -1,0 +1,26 @@
+This folder contains codes to pair OSM label and Sentinel-2 image patches. 
+
+
+Descriptions of files:
+
+0_generate_dat_and_lab_classification.py
+With OSM label file and Sentinel-2 image file, this script pairs OSM label and S2 image patch
+
+
+0_generate_dat_and_lab_regression.py
+The same function as "0_generate_dat_and_lab_classification.py", only the label are in percentage
+
+
+batch_processing_data_generation.py
+This script calls "0_generate_dat_and_lab_classification.py" to accomplish the label-data paring for multiple cities
+
+
+1_visual_dat_and_lab.py
+A visualization script
+
+
+data_organization.py
+This script organizes data into h5 files so that they can be easily used in training deep models
+
+
+
