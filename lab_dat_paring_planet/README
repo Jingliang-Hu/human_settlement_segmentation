@@ -1,7 +1,3 @@
-0_upsample_osm_lab_2_GSD3m.py:
-Upsample the 10 meter GSD OSM label to 3 meter GSD label. output: WGS84/UTM zone; 
-
-
 0_upsample_planet_2_GSD3m.py
 Upsample the planet images to 3 meter GSD label. output: WGS84/UTM zone;
 

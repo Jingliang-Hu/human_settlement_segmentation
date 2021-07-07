@@ -1,2 +1,6 @@
-In this folder, it stores planet image tiles for each city. The data is upsampled to 3 meter GSD and geocoded in WGS84/UTM zone.
-Original data source: so2sat-gpu:/data/wang/DATA/PLANET/BASEMAP_LCZ1692
+In this folder, it stores planet image tiles for each city. 
+The data is upsampled to 3 meter GSD and geocoded in WGS84/UTM zone.
+Original data might not have 3 meter GSD and not geocoded in WGS84/UTM zone.
+Original data are saved here: so2sat-gpu:/data/wang/DATA/PLANET/BASEMAP_LCZ1692
+
+Planet related data are generated on so2sat-gpu server.

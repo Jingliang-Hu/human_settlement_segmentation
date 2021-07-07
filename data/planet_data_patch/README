@@ -2,8 +2,12 @@ In each city folder, it stores paired osm label and planet image patch.
 The name of saved data file is PatchSz128_LabPerc70.h5, where PatchSz128 means the image patch is 128*128 and LabPerc70 means more than 70% pixels of the image patch have a label from OSM label.
 
 labels:
-0: No label (might be non-building, also might be one of the following)
+0: Unknown class (might be non-building, also might be one of the following)
 1: Commercial building
 2: Industrial building
 3: Residential building
 4: Other building
+
+
+Planet related data are generated on so2sat-gpu server.
+
