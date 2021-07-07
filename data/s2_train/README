@@ -1,4 +1,4 @@
-This folder saves the organized h5 data file that can be directly used for training, for planet images.
+This folder saves the organized h5 data file that can be directly used for training, for sentinel-2 images.
 
 exclude-unknown: the values are set as 0 for those pixels labeled as unknown class
 include-unknown: the values are unchanged for those pixels labeled as unknown class
