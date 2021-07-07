@@ -18,13 +18,13 @@ season = 'all'
 
 # Mask our unknown class
 # if mask_out_unknown_class = True, the values equal 0 for those pixels labeled as unknown class
-mask_out_unknown_class = False
+mask_out_unknown_class = True
 
 # out_directory
 if mask_out_unknown_class:
-    out_directory = cities+'-season-'+season+'-exclude-unknown'
+    out_directory = '../data/s2_train/'+cities+'-season-'+season+'-exclude-unknown'
 else:
-    out_directory = cities+'-season-'+season+'-include-unknown'
+    out_directory = '../data/s2_train/'+cities+'-season-'+season+'-include-unknown'
 
 
 # Season selection
