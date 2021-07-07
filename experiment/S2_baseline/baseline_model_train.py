@@ -27,7 +27,7 @@ paraDict = {
         "val_percent": 0.2,
         "save_best_model": 1,
         ### data loading parameters
-        "trainData": env_path+"/lab_dat_paring_S2/cultural-10-4-seasons/train.h5",
+        "trainData": env_path+"/data/s2_train/cultural-10-season-all-exclude-unknown/train.h5",
         ### model name
         "backbone_model": 'unet',
         "solution": 'classification',
@@ -72,7 +72,7 @@ STEP THREE: Define a loss function and optimizer
 '''
 import torch.optim as optim
 import torch.nn as nn
-classWeight = torch.tensor(paraDict["class_weights"]).to(cudaNow)
+classWeight = torch.tensor(paraDict["class_weights"]).type(torch.float32).to(cudaNow)
 criterion = nn.CrossEntropyLoss(weight=classWeight)
 #criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=paraDict["lr_rate"])
