@@ -2,7 +2,7 @@ import glob
 import os
 
 # Retrieve availabel OSM label files 
-osm_label_files = glob.glob('/datastore/exchange/jingliang/human_settlement_segmentation/data/lcz_osm_rasters/*tif.tif')
+osm_label_files = glob.glob('../data/lcz_osm_rasters/*tif.tif')
 # Directory to So2Sat S2 database
 s2_data_store = '/datastore/DATA/classification/SEN2/global_utm/'
 # The percentage of a image patch that are labeled

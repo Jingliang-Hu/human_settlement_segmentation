@@ -16,16 +16,21 @@ Outputs:
   Paired S2 image patches and OSM labels which are stored as H5 files in "../data/s2_data_patch/".
 
 
-batch_processing_data_generation.py
+1_batch_processing_data_generation.py
 This script calls "0_generate_dat_and_lab_classification.py" to accomplish the label-data paring for cities, whose OSM label files are available.
+Inputs:
+  - parameters			-- Set parameters from line 4 to line 13
+Outputs:
+  - paired data for multiple cities in "../data/s2_data_patch/"
 
 
-1_visual_dat_and_lab.py
+2_data_organization.py
+This script organizes data into h5 files so that they can be easily used in training deep models.
+Options in the script:
+  - Season		-- One can selection on of the four seasons or all of them
+  - Unknown class 	-- If true, the values are set as 0 for all pixels that are set as unknown class
+
+
+9_visual_dat_and_lab.py
 A script for visualizing image and label pairs.
-
-
-data_organization.py
-This script organizes data into h5 files so that they can be easily used in training deep models
-
-
 
