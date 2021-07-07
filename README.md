@@ -10,3 +10,9 @@ In file "env_path", replace "/directory-to-current-folder" with the directory of
 conda env create -f environment.yml #Create env from yml file
 conda activate settlement_env #activate the conda env
 ```
+
+# Data generation pipeline
+## Planet
+Please see folder: lab_dat_paring_planet
+## Sentinel-2
+Please see folder: lab_dat_paring_S2
