@@ -1,2 +1,13 @@
+In each city folder, it stores paired osm label and sentinel-2 image patch.
+The name of saved data file is PatchSz32_LabPerc70_autumn.h5, where PatchSz32 means the image patch is 32*32, LabPerc70 means more than 70% pixels of the image patch have a label from OSM label, and autumn indicates the season (can also be spring, summer, or winter).
+
+labels:
+0: Unknown class (might be non-building, also might be one of the following)
+1: Commercial building
+2: Industrial building
+3: Residential building
+4: Other building
+
+
 Sentinel-2 related data are generated on so2sat-data server.
 
