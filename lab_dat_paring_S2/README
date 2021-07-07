@@ -4,19 +4,24 @@ This folder contains codes to pair OSM label and Sentinel-2 image patches.
 Descriptions of files:
 
 0_generate_dat_and_lab_classification.py
-With OSM label file and Sentinel-2 image file, this script pairs OSM label and S2 image patch
-
-
-0_generate_dat_and_lab_regression.py
-The same function as "0_generate_dat_and_lab_classification.py", only the label are in percentage
+With given OSM label files, this script automatically finds the corresponding Sentinel-2 image from So2Sat S2 database and pairs S2 patches with OSM labels patches.
+Inputs:
+  - label_dir			-- Directory to the osm label (GeoTiff) of a city
+  - data_store 			-- Directory to the Sentinel-2 database 
+				   For example, '/datastore/DATA/classification/SEN2/global_utm/' 
+  - patch_label_perc_thres	-- The percentage of a image patch that are labeled
+  - patch_size			-- The size of a image patch, e.g. '32': 32 by 32 image patch
+  - shift_perc			-- The overlaping rate of adjacent image patches (0.0-1.0)
+Outputs:
+  Paired S2 image patches and OSM labels which are stored as H5 files in "../data/s2_data_patch/".
 
 
 batch_processing_data_generation.py
-This script calls "0_generate_dat_and_lab_classification.py" to accomplish the label-data paring for multiple cities
+This script calls "0_generate_dat_and_lab_classification.py" to accomplish the label-data paring for cities, whose OSM label files are available.
 
 
 1_visual_dat_and_lab.py
-A visualization script
+A script for visualizing image and label pairs.
 
 
 data_organization.py

@@ -11,20 +11,20 @@ from tqdm import tqdm
 '''
 Input arguments
 '''
-# Directory to label data of a city
+# Directory to the osm label (GeoTiff)of a city
 label_dir = sys.argv[1]
 
-# List of directories to sentinel-2 data of a city
+# List of directories to sentinel-2 image (GeoTiff) of a city
 data_store = sys.argv[2]
 
-# labeled percentage of a data patch
+# the percentage of a image patch that are labeled
 patch_label_perc_thres = float(sys.argv[3])
 
-# data patch size
+# the size of a image patch size
 patch_size = int(float(sys.argv[4]))
 half_patch = np.array(patch_size/2).astype(np.int8)
 
-# overlaping rate of adjacent data patches
+# overlaping rate of adjacent image patches
 shift_perc = float(sys.argv[5])
 shift_gap = np.round(patch_size * shift_perc).astype(np.int64)
 
@@ -38,8 +38,6 @@ f = gdal.Open(label_dir)
 dat = f.ReadAsArray()
 lab_geoInfoGrid = f.GetGeoTransform()
 del f
-
-
 
 '''
 label:
