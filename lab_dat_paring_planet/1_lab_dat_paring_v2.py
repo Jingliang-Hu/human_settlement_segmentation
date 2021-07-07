@@ -12,11 +12,11 @@ from tqdm import tqdm
 Input arguments
 '''
 # Label file
-label_dir = '../data/lcz_osm_rasters/00085_206167_sydney_3m.tif'
+#label_dir = '../data/lcz_osm_rasters/00085_206167_sydney_3m.tif'
 label_dir = sys.argv[1]
 
 # data file
-data_dir = '../data/planet/00085_206167_Sydney'
+#data_dir = '../data/planet/00085_206167_Sydney'
 data_dir = sys.argv[2]
 
 # labeled percentage of a data patch
