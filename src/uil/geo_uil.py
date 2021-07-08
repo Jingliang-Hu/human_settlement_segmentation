@@ -185,9 +185,9 @@ def patch_labeling_percentage(label_mask, patch_size):
     lab_tmp_pad = np.pad(lab_tmp,((half_patch,half_patch),(half_patch,half_patch)),mode='constant').astype(np.int32)
     lab_idx = np.zeros(lab_tmp_pad.shape).astype(np.int32)
     print('Calculating the patch label percentage:')
-    for i in tqdm(range(-half_patch,half_patch)):
+    for i in tqdm(range(-half_patch,half_patch-1)):
         rotation = np.roll(lab_tmp_pad,i,axis=0)
-        for j in range(-half_patch,half_patch):
+        for j in range(-half_patch,half_patch-1):
             lab_idx += np.roll(rotation,j,axis=1)
 
     lab_idx = lab_idx[half_patch:-half_patch,half_patch:-half_patch]
