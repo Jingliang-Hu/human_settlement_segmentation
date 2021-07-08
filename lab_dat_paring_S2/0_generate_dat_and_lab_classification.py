@@ -69,7 +69,7 @@ order_img_coord = np.transpose(np.stack((np.flip(order_img_coord[0]),np.flip(ord
 order_img_coord = order_img_coord[:nb_patches,:]
 
 
-# get rid of label patches that are within half patch size to the boundaries.
+# get rid of label patches whose overlapping rates are higher than threshold
 i=0
 while i<order_img_coord.shape[0]:
     neibor_south_idx = np.logical_and((order_img_coord[:,0]>order_img_coord[i,0]), (order_img_coord[:,0]<order_img_coord[i,0]+shift_gap))
