@@ -28,13 +28,20 @@ paraDict = {
         "save_best_model": 1,
         ### data loading parameters
         "trainData": env_path+"/data/s2_train/cultural-10-season-all-exclude-unknown/train.h5",
-        "testData": env_path+"/data/s2_data_patch/00064_22447_singapore/PatchSz32_LabPerc70_autumn.h5",
         ### model name
         "backbone_model": 'unet',
         "solution": 'classification',
         "exper_description": 'test_debug_run',
         ### class weights in entropy loss
-        "class_weights": [0,1,1,1,1]
+        "class_weights": [0,1,1,1,1],
+
+        ### testing data load
+        # osm testing
+        #"testData": env_path+"/data/s2_data_patch/00064_22447_singapore/PatchSz32_LabPerc70_autumn.h5",
+        # cadastral testing
+        "testData": env_path+"/data/s2_data_patch_cadastral/00064_22447_singapore/PatchSz32_LabPerc70_autumn.h5",
+
+
         }
 cudaNow = torch.device("cuda:0")
 
