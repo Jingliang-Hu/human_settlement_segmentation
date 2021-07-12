@@ -20,7 +20,7 @@ print("parameter setting ...")
 paraDict = {
         ### network parameters
         "batch_size": 256,
-        "n_epoch": 100,
+        "n_epoch": 1,
         "training_patient": 20,
         "lr_rate": 0.01,
         "lr_rate_patient": 5,
@@ -28,6 +28,7 @@ paraDict = {
         "save_best_model": 1,
         ### data loading parameters
         "trainData": env_path+"/data/s2_train/cultural-10-season-all-exclude-unknown/train.h5",
+        "testData": env_path+"/data/s2_data_patch/00064_22447_singapore/PatchSz32_LabPerc70_autumn.h5"
         ### model name
         "backbone_model": 'unet',
         "solution": 'classification',
@@ -58,6 +59,7 @@ tra_dat, val_dat = random_split(data_training, [n_tra, n_val])
 train_loader = DataLoader(tra_dat, batch_size=paraDict["batch_size"], shuffle=True)
 valid_loader = DataLoader(val_dat, batch_size=paraDict["batch_size"], shuffle=True)
 
+pred_dat = load_data.data_set(paraDict["testData"])
 
 '''
 STEP TWO: initial deep model
