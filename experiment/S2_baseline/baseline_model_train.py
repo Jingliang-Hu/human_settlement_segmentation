@@ -20,7 +20,7 @@ print("parameter setting ...")
 paraDict = {
         ### network parameters
         "batch_size": 256,
-        "n_epoch": 1,
+        "n_epoch": 100,
         "training_patient": 20,
         "lr_rate": 0.01,
         "lr_rate_patient": 5,
@@ -28,7 +28,7 @@ paraDict = {
         "save_best_model": 1,
         ### data loading parameters
         "trainData": env_path+"/data/s2_train/cultural-10-season-all-exclude-unknown/train.h5",
-        "testData": env_path+"/data/s2_data_patch/00064_22447_singapore/PatchSz32_LabPerc70_autumn.h5"
+        "testData": env_path+"/data/s2_data_patch/00064_22447_singapore/PatchSz32_LabPerc70_autumn.h5",
         ### model name
         "backbone_model": 'unet',
         "solution": 'classification',
