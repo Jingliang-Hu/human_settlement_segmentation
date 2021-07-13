@@ -8,9 +8,9 @@ import sys
 city = '00005_21206_Mumbai'
 city = sys.argv[1]
 
-h5py_file = '../data/data_patch/'+city+'/*.h5'
-h5py_file = glob.glob('../data/data_patch/'+city+'/*.h5')[0]
-out_dirs = '../data/data_patch/'+city+'/'
+h5py_file = '../data/s2_data_patch/'+city+'/*.h5'
+h5py_file = glob.glob('../data/s2_data_patch/'+city+'/*.h5')[0]
+out_dirs = '../data/s2_data_patch/'+city+'/'
 
 f = h5py.File(h5py_file,'r')
 dat = np.array(f['dat'])
