@@ -17,16 +17,22 @@ label_dir = sys.argv[1]
 # List of directories to sentinel-2 image (GeoTiff) of a city
 data_store = sys.argv[2]
 
+# output folder
+out_folder = '../data/s2_data_patch_cadastral/'
+out_folder = sys.argv[3]
+
 # the percentage of a image patch that are labeled
-patch_label_perc_thres = float(sys.argv[3])
+patch_label_perc_thres = float(sys.argv[4])
 
 # the size of a image patch size
-patch_size = int(float(sys.argv[4]))
+patch_size = int(float(sys.argv[5]))
 half_patch = np.array(patch_size/2).astype(np.int8)
 
 # overlaping rate of adjacent image patches
-shift_perc = float(sys.argv[5])
+shift_perc = float(sys.argv[6])
 shift_gap = np.round(patch_size * shift_perc).astype(np.int64)
+
+
 
 '''
 Load label data
@@ -121,7 +127,7 @@ for i in range(len(data_dir)):
     print('Shape of label patch: {}'.format(lab_patch_out.shape))
 
     # save data patches
-    out_directory = '../data/s2_data_patch/'+city
+    out_directory = out_folder + city
     if not os.path.exists(out_directory):
         os.makedirs(out_directory)
 
