@@ -9,6 +9,9 @@ patch_label_percentage = '0.7'
 data_patch_size = '128'
 stride_percentage = '0.2'
 
+if len(osm_label_files)==0:
+    print('No label file found')
+
 
 for idx in range(len(osm_label_files)):
     city_code = osm_label_files[idx].split('/')[-1].split('_')[1]
